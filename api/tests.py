@@ -175,3 +175,27 @@ class PixochiDrawTestCase(TestCase):
         )
         self.assertEqual(pic, pixochi.draw())
 
+
+class PixochiIntegrationTestCase(TestCase):
+
+    def test_nurse_several_times(self):
+        pixochi = Pixochi.create(name='pix1', eyes=2, style='*', frequency=_TEST_STATE_UPDATE_FREQUENCY)
+        time.sleep(_TEST_STATE_UPDATE_FREQUENCY_SEC * 2.5)
+        pixochi.nurse()
+        pixochi.nurse()
+        self.assertEqual('normal', pixochi.get_my_state())
+
+    def test_nurse_when_pixochi_died(self):
+        pixochi = Pixochi.create(name='pix1', eyes=2, style='*', frequency=_TEST_STATE_UPDATE_FREQUENCY)
+        time.sleep(_TEST_STATE_UPDATE_FREQUENCY_SEC * 2.5)
+        pixochi.nurse()
+        time.sleep(_TEST_STATE_UPDATE_FREQUENCY_SEC * 2)
+        self.assertRaises(PixochiDeadError, pixochi.nurse)
+
+    def test_nurse_many_times(self):
+        pixochi = Pixochi.create(name='pix1', eyes=2, style='*', frequency=_TEST_STATE_UPDATE_FREQUENCY)
+        for i in range(10):
+            pixochi.nurse()
+        self.assertEqual('normal', pixochi.get_state_display())
+        time.sleep(_TEST_STATE_UPDATE_FREQUENCY_SEC * 3.5)
+        self.assertRaises(PixochiDeadError, pixochi.nurse)
