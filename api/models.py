@@ -3,6 +3,7 @@ import time
 
 from rest_framework.renderers import JSONRenderer
 
+from api.exception import NameOccupiedError, PixochiNotFoundError, PixochiDeadError
 from api.serializer import PixochiStateResponseSerializer
 
 
@@ -24,7 +25,7 @@ def time_ms():
 
 
 class Pixochi(models.Model):
-    _STATE_CHANGE_FREQUENCY = 10000
+    _STATE_CHANGE_FREQUENCY = 1000 * 60 * 10
 
     STATES = (
         (3, 'normal'),
@@ -37,14 +38,15 @@ class Pixochi(models.Model):
     eyes = models.IntegerField()
     style = models.CharField(max_length=1)
     state = models.IntegerField(choices=STATES, default=3)
+    frequency = models.IntegerField(choices=STATES, default=_STATE_CHANGE_FREQUENCY)
     lastStateChange = models.IntegerField(default=time_ms)
 
     def update_state(self):
         interval = time_ms() - self.lastStateChange
-        while self.state and interval >= Pixochi._STATE_CHANGE_FREQUENCY:
-            interval -= Pixochi._STATE_CHANGE_FREQUENCY
+        while self.state and interval >= self.frequency:
+            interval -= self.frequency
             self.state -= 1
-            self.lastStateChange += Pixochi._STATE_CHANGE_FREQUENCY
+            self.lastStateChange += self.frequency
         self.save()
 
     def get_my_state(self):
@@ -72,6 +74,27 @@ class Pixochi(models.Model):
         response = PixochiStateResponse(self.get_my_state(), self.draw())
         serializer = PixochiStateResponseSerializer(response)
         return JSONRenderer().render(serializer.data)
+
+    def nurse(self):
+        cur_state = self.get_my_state()
+        if cur_state == 'dead':
+            raise PixochiDeadError()
+        if cur_state != 'normal':
+            self.state += 1
+            self.lastStateChange = time_ms()
+
+    @staticmethod
+    def create(name, eyes, style, frequency=_STATE_CHANGE_FREQUENCY, state=3):
+        if Pixochi.objects.filter(pk=name).exists():
+            raise NameOccupiedError()
+        return Pixochi.objects.create(name=name, eyes=eyes, style=style, frequency=frequency, state=state)
+
+    @staticmethod
+    def get(name):
+        found = Pixochi.objects.filter(pk=name)
+        if not found.exists():
+            raise PixochiNotFoundError()
+        return found.get()
 
 
 def eye_top(char, state):
