@@ -1,8 +1,9 @@
 from django.db import models
 import time
 
-from rest_framework import serializers
 from rest_framework.renderers import JSONRenderer
+
+from api.serializer import PixochiStateResponseSerializer
 
 
 class NewPixochiRequest:
@@ -10,24 +11,6 @@ class NewPixochiRequest:
         self.name = name
         self.eyes = eyes
         self.filling = filling
-
-
-class NewPixochiRequestSerializer(serializers.Serializer):
-    name = serializers.CharField(min_length=1, max_length=10)
-    eyes = serializers.IntegerField()
-    filling = serializers.CharField(min_length=1, max_length=1)
-
-    def validate_eyes(self, value):
-        if value < 1:
-            raise serializers.ValidationError("Pixochi must have at least one eye")
-        if value > 8:
-            raise serializers.ValidationError("Pixochi can't have more than 8 eyes")
-        return value
-
-
-class PixochiStateResponseSerializer(serializers.Serializer):
-    state = serializers.CharField()
-    pic = serializers.CharField()
 
 
 class PixochiStateResponse:

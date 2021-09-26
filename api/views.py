@@ -2,7 +2,8 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST, require_GET
 from rest_framework.parsers import JSONParser
 
-from api.models import Pixochi, NewPixochiRequestSerializer
+from api.models import Pixochi
+from api.serializer import NewPixochiRequestSerializer
 
 
 @require_POST
