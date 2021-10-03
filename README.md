@@ -8,5 +8,6 @@
 Запустить тесты:
 
 ```
+cd pixochi-main
 ./manage.py test
 ```
