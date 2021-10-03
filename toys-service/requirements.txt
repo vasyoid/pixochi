@@ -1,0 +1,13 @@
+aniso8601==7.0.0
+fastapi==0.68.1
+graphene==2.1.9
+graphql-core==2.3.2
+graphql-relay==2.0.1
+promise==2.3
+pydantic==1.8.2
+Rx==1.6.1
+six==1.16.0
+starlette==0.14.2
+typing-extensions==3.10.0.2
+uvloop==0.16.0
+httptools==0.1.0
