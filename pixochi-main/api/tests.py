@@ -199,3 +199,20 @@ class PixochiIntegrationTestCase(TestCase):
         self.assertEqual('normal', pixochi.get_state_display())
         time.sleep(_TEST_STATE_UPDATE_FREQUENCY_SEC * 3.5)
         self.assertRaises(PixochiDeadError, pixochi.nurse)
+
+
+class DatabaseIntegrationTestCase(TestCase):
+
+    def test_create_single(self):
+        Pixochi.create(name='pix1', eyes=2, style='*')
+        pixochi = Pixochi.get('pix1')
+        self.assertEqual('pix1', pixochi.name)
+        self.assertEqual(2, pixochi.eyes)
+        self.assertEqual('*', pixochi.style)
+        self.assertEqual('normal', pixochi.get_state_display())
+
+    def test_create_multiple(self):
+        Pixochi.create(name='pix1', eyes=2, style='*')
+        Pixochi.create(name='pix2', eyes=2, style='**')
+        self.assertIsNotNone(Pixochi.get('pix1'))
+        self.assertIsNotNone(Pixochi.get('pix2'))
